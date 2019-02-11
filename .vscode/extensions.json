@@ -1,0 +1,29 @@
+{
+    "recommendations": [
+        "abhiagr.livs",
+        "christian-kohler.path-intellisense",
+        "DavidAnson.vscode-markdownlint",
+        "eamodio.gitlens",
+        "fabiospampinato.vscode-diff",
+        "GreatMinds.gitflow4code",
+        "IBM.output-colorizer",
+        "neilding.language-liquid",
+<<<<<<< HEAD
+=======
+        "PeterJausovec.vscode-docker",
+>>>>>>> 15a4c2cfb03c35e429f5fd911d882622d0531da1
+        "RushFrisby.Encryptor", 
+        "waderyan.gitblame",
+        "richie5um2.vscode-statusbar-json-path",
+        "joshuapoehls.json-escaper",
+        "octref.vscode-json-transform",
+        "mechatroner.rainbow-csv",
+        "dotjoshjohnson.xml",
+        "mitchdenny.ecdc",
+        "humao.rest-client",
+        "yoshinorin.current-file-path",
+        "donjayamanne.githistory",
+        "ms-vscode.csharp",
+        "tomoki1207.pdf"
+    ]
+}

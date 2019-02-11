@@ -1,0 +1,77 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+<<<<<<< HEAD
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}",
+        },
+        {
+=======
+>>>>>>> 15a4c2cfb03c35e429f5fd911d882622d0531da1
+            "name": ".NET Core Launch (Getting Started)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build netcore",
+            "program": "${workspaceFolder}/getting_started/netcore/bin/Debug/netcoreapp2.2/netcore.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/getting_started/netcore",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Launch (Documents)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build netcore",
+            "program": "${workspaceFolder}/getting_started/netcore/bin/Debug/netcoreapp2.2/netcore.dll",
+            "args": [
+                "documents_demo"
+            ],
+            "cwd": "${workspaceFolder}/getting_started/netcore",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Launch (Documents+Ingestion)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build netcore",
+            "program": "${workspaceFolder}/getting_started/netcore/bin/Debug/netcoreapp2.2/netcore.dll",
+            "args": [
+                "documents_ingestion_demo"
+            ],
+            "cwd": "${workspaceFolder}/getting_started/netcore",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Launch (Searching)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build netcore",
+            "program": "${workspaceFolder}/getting_started/netcore/bin/Debug/netcoreapp2.2/netcore.dll",
+            "args": [
+                "searching_demo"
+            ],
+            "cwd": "${workspaceFolder}/getting_started/netcore",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": "Python: Terminal (integrated)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/getting_started/python"
+        }
+    ]
+}

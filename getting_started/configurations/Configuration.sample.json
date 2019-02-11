@@ -1,0 +1,8 @@
+{
+    "name" : "Configuration Name",
+    "baseUrl" : "https://hostname",
+    "clientId":"oauth2 client id",
+    "clientSecret": "oauth2 secret",
+    "oauthBaseUrl": "oauth2 base url",
+    "tenantId" : "A tenant id"
+}

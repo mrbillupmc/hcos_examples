@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build netcore",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/getting_started/netcore/netcore.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

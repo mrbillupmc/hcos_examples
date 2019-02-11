@@ -1,0 +1,4 @@
+{
+    "python.terminal.activateEnvironment": true,
+    "python.pythonPath": "getting_started/python/env/bin/python"
+}
