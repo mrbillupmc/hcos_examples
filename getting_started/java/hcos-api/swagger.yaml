@@ -1,0 +1,553 @@
+openapi: 3.0.0
+info:
+  version: '2.0.0'
+  title: 'hcOS Developer Experience'
+  description: 'hcOS Developer Experience API'
+tags:
+- name: Document
+  description: Document operations.
+- name: Search
+  description: Searching operations.
+servers:
+  - description: This server
+    url: /
+paths:
+  /api/v2/{tenant_id}/document/root/{document_root}/extension/{document_extension}:
+    get:
+      operationId: getDocumentByRootExtension
+      summary: Requests current primary document by document root, extension.
+      security: 
+        - oAuth2ClientCredentials:
+          - http://hcos.com/upmc_provider:system:Document.*
+      tags:
+        - Document
+      parameters:
+        - in: header
+          name: x-correlation-id
+          schema:
+              type: string
+              example: 8e71f9f9-e6cd-40b4-8fb4-1b499c0e2f3f
+          required: true
+        - in: header
+          name: x-hcos-user-root
+          schema:
+              type: string
+              example: hcos.upmce.net
+          required: true
+        - in: header
+          name: x-hcos-user-extension
+          schema:
+              type: string
+              example: doej
+          required: true
+        - in: path
+          name: tenant_id
+          schema:
+            type: string
+            example: mimic
+          required: true
+        - in: path
+          name: document_root
+          schema:
+            type: string
+            example: MIMIC.DOCUMENT.OID
+          required: true
+        - in: path
+          name: document_extension
+          schema:
+            type: string
+            example: 1
+          required: true
+      responses:
+        '200':    # status code
+          description: Requested current primary document for given document root and extension.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentMeta'
+  /api/v2/{tenant_id}/document/root/{document_root}/extension/{document_extension}/data:
+    get:
+      operationId: getDocumentDataByRootExtension
+      summary: Requests document data by document root, extension.
+      security: 
+        - oAuth2ClientCredentials:
+          - http://hcos.com/upmc_provider:system:Document.*
+      tags:
+        - Document
+      parameters:
+        - in: header
+          name: x-correlation-id
+          schema:
+              type: string
+              example: 8e71f9f9-e6cd-40b4-8fb4-1b499c0e2f3f
+          required: true
+        - in: header
+          name: x-hcos-user-root
+          schema:
+              type: string
+              example: hcos.upmce.net
+          required: true
+        - in: header
+          name: x-hcos-user-extension
+          schema:
+              type: string
+              example: doej
+          required: true
+        - in: path
+          name: tenant_id
+          schema:
+            type: string
+            example: mimic
+          required: true
+        - in: path
+          name: document_root
+          schema:
+            type: string
+            example: MIMIC.DOCUMENT.OID
+          required: true
+        - in: path
+          name: document_extension
+          schema:
+            type: string
+            example: 1
+          required: true
+      responses:
+        '200':    # status code
+          description: Requested current primary document formatted data by document root and extension.
+          content:
+            text/plain:
+              schema:
+                type: string
+            text/html:
+              schema:
+                type: string
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /api/v2/{tenant_id}/documents/search:
+    post:
+      operationId: postSearchByKDSL
+      summary: Requests documents by KDSL.
+      security: 
+        - oAuth2ClientCredentials:
+          - http://hcos.com/upmc_provider:system:Search.*
+      tags:
+        - Search
+      parameters:
+        - in: header
+          name: x-correlation-id
+          schema:
+              type: string
+              example: 8e71f9f9-e6cd-40b4-8fb4-1b499c0e2f3f
+          required: true
+        - in: header
+          name: x-hcos-user-root
+          schema:
+              type: string
+              example: hcos.upmce.net
+          required: true
+        - in: header
+          name: x-hcos-user-extension
+          schema:
+              type: string
+              example: doej
+          required: true
+        - in: path
+          name: tenant_id
+          schema:
+            type: string
+            example: mimic
+          required: true
+        - in: query
+          name: from
+          schema:
+            type: integer
+            example: 0
+          required: false
+        - in: query
+          name: size
+          schema:
+            type: integer
+            example: 10
+          required: false
+        - in: query
+          name: snippet
+          schema:
+            type: string
+            enum:
+              - on
+              - off
+            example: off
+          required: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example: { "criterion" : "literal='ulcerative colitis'" }
+            schema:
+              $ref: '#/components/schemas/SearchCriterion'
+      responses:
+        '200':    # status code
+          description: Requested document set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResult'
+components:
+  securitySchemes:
+    oAuth2ClientCredentials:
+      type: oauth2
+      description: OAuth token generated from API Gateway Cognito
+      flows: 
+        clientCredentials: 
+          #tokenUrl: https://upmce-hcos-apigateway-dev.auth.us-east-1.amazoncognito.com/oauth2/token 
+          tokenUrl: https://hcos-labs-dev.auth.us-east-1.amazoncognito.com/oauth2/token
+          scopes:
+            http://hcos.com/upmc_provider:system:Document.*: Grants RW access to Documents API.
+            http://hcos.com/upmc_provider:system:Patient.*: Grants RW access to Patient API.
+            http://hcos.com/upmc_provider:system:Search.*: Grants access to Search API.
+            http://hcos.com/Skunkwork.*: Skunkworks
+  schemas:
+    SkunworkResponse:
+        type: object
+        properties:
+          message:
+            type: string
+    DataStatus:
+      type: string
+      enum:
+        - new
+        - valid
+        - not_applicable
+        - invalid
+        - deleted
+        - retrieve_error
+    DataPrecedence:
+      type: string
+      enum:
+        - originator
+        - primary
+        - secondary
+    DataFormat:
+      type: string
+      enum:
+        - text/hl7
+        - text/plain
+        - text/rtf
+        - text/html
+        - application/rtf
+        - application/pdf
+        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+        - application/msword
+        - application/hl7-v3+xml
+    Gender:
+      type: string
+      enum:
+        - male
+        - female
+        - ambiguous
+        - other
+        - not_applicable
+        - unknown
+    DocumentStatus:
+      type: string
+      enum:
+        - unknown
+        - preliminary
+        - final
+        - corrected
+        - addendum
+        - in_error
+        - cancelled
+    ConfidentialityCode:
+      type: string
+      enum:
+        - unknown
+        - unrestricted
+        - restricted
+        - very_restricted
+    PersonRole:
+      type: string
+      enum:
+        - admitting
+        - attending
+        - authoring
+        - authenticating
+        - consulting
+        - interpreting
+        - ordering
+        - performing
+        - receiving
+        - referring
+        - transcribing
+        - unknown
+    Person:
+      type: object
+      required:
+        - role
+        - root
+        - extension
+      properties:
+        role:
+          $ref: '#/components/schemas/PersonRole'
+        root:
+          type: string
+        extension:
+          type: string
+        last_name:
+          type: string
+        first_name:
+          type: string
+        middle_name:
+          type: string
+    DocumentMeta:
+      type: object
+      properties:
+        id:
+          type: string
+        root:
+          type: string
+        extension:
+          type: string
+        extension_suffix:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        date_of_service:
+          type: string
+        received_in_repository_at:
+          type: string
+        data_format:
+         $ref: '#/components/schemas/DataFormat'
+        data_status:
+          $ref: '#/components/schemas/DataStatus'
+        data_precedence:
+          $ref: '#/components/schemas/DataPrecedence'
+        patient_root:
+          type: string
+        patient_extension:
+          type: string
+        document_root:
+          type: string
+        document_extension:
+          type: string
+        document_status:
+          $ref: '#/components/schemas/DocumentStatus'
+        document_type_root:
+          type: string
+        document_type_extension:
+          type: string
+        document_type_description:
+          type: string
+        baseline_document_type_root:
+          type: string
+        baseline_document_type_extension:
+          type: string
+        baseline_document_type_description:
+          type: string
+        document_type_of_service_root:
+          type: string
+        document_type_of_service_extension:
+          type: string
+        document_type_of_service_description:
+          type: string
+        document_kind_of_document_root:
+          type: string
+        document_kind_of_document_extension:
+          type: string
+        document_subject_matter_domain_root:
+          type: string
+        document_subject_matter_domain_extension:
+          type: string
+        facility_root:
+          type: string
+        facility_extension:
+          type: string
+        facility_baseline_root:
+          type: string
+        facility_baseline_extension:
+          type: string
+        visit_root:
+          type: string
+        visit_extension:
+          type: string
+        provider:
+          type: string
+        document_admitting_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_attending_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_authenticating_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_authoring_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_consulting_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_interpreting_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_ordering_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_performing_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_receiving_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_referring_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_transcribing_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        document_unknown_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_admitting_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_attending_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_authenticating_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_authoring_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_consulting_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_interpreting_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_ordering_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_performing_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_receiving_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_referring_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_transcribing_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        visit_unknown_person:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+    SearchCriterion:
+      type: object
+      properties:
+        criterion:
+          type: string
+    SearchDocument:
+      type: object
+      properties:
+        kamioka_updated_at:
+          type: string
+          format: date-time
+        patient_root:
+          type: string
+        patient_extension:
+          type: string
+        patient_cluster_id:
+          type: string
+        patient_last_name:
+          type: string
+        patient_first_name:
+          type: string
+        patient_middle_name:
+          type: string
+        patient_birthdate:
+          type: string
+          format: date
+        patient_age_at_document_date:
+          type: integer
+        patient_gender:
+          $ref: '#/components/schemas/Gender'
+        document_root:
+          type: string
+        document_extension:
+          type: string
+        document_type_root:
+          type: string
+        document_type_extension:
+          type: string
+        facility_root:
+          type: string
+        facility_extension:
+          type: string
+        document_kind_of_document_root:
+          type: string
+        document_kind_of_document_extension:
+          type: string
+        document_type_of_service_root:
+          type: string
+        document_type_of_service_extension:
+          type: string
+        document_subject_matter_domain_root:
+          type: string
+        document_subject_matter_domain_extension:
+          type: string
+        modality:
+          type: string
+        body_location:
+          type: string
+        source_created_at:
+          type: string
+          format: date-time
+        source_updated_at:
+          type: string
+          format: date-time
+    SearchResult:
+      type: object
+      properties:
+        offset:
+          type: integer
+        record_count:
+          type: integer
+        total_record_count:
+          type: integer
+        hits:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentMeta'

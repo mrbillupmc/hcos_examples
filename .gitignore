@@ -1,6 +1,38 @@
 **/configurations/*
 !**/configurations/*.sample.json
 
+#Begin Java example stuff
+getting_started/java/target/
+getting_started/java/!.mvn/wrapper/maven-wrapper.jar
+
+### STS ###
+getting_started/java/.apt_generated
+getting_started/java/.classpath
+getting_started/java/.factorypath
+getting_started/java/.project
+getting_started/java/.settings
+getting_started/java/.springBeans
+getting_started/java/.DS_Store
+
+### IntelliJ IDEA ###
+getting_started/java/.idea
+getting_started/java/*.iws
+getting_started/java/*.iml
+getting_started/java/*.ipr
+
+### NetBeans ###
+getting_started/java/nbproject/private/
+getting_started/java/build/
+getting_started/java/nbbuild/
+getting_started/java/dist/
+getting_started/java/nbdist/
+getting_started/java/.nb-gradle/
+
+### hcos-api ###
+getting_started/hcos-api/target
+getting_started/hcos-api/hcos-api-generated
+#End Java example stuff
+
 
 # macOS stuff
 # General
