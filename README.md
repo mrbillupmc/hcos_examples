@@ -12,7 +12,7 @@ The hcOS Developer Experience (DX) Team focuses on designing APIs, building tool
 
 Member | Role
 -------|-----
-[Brian J Kolowitz](https://www.linkedin.com/in/briankolowitz/) | Director Platform Product Management & API Developer Experience (DX)
+[Brian J Kolowitz](https://www.linkedin.com/in/briankolowitz/) | Director Product Management & API Developer Experience (DX)
 [Carlos Betancourt](https://www.linkedin.com/in/betancourtca/) | Clinical Informatics Subject Matter Expert
 [Nathan Lauffer](https://www.linkedin.com/in/nathanlauffer/) | Developer Advocate
 
@@ -20,13 +20,9 @@ Member | Role
 
 ### [Getting Started](getting_started)
 
-The [Getting Started](getting_started) guide is the quickest and easiest way to get from zero to first-hello-world in a matter of minutes. In this guide you'll learn how to issue and sign hcOS Search API and hcOS Document API requests as well as process both search and document results.
+Please jump over to our developer guide to [Get Started](https://upmc-enterprises.github.io/hcos-documentation/#hcos-getting-started)!
+
 
 ### Patient Viewer (Coming soon...)
 
 The Patient Viewer (Coming soon...) guide will show you how to retrieve and display all hcOS data elements for a single patient. This guide will be useful for building patient centric applications.
-
-## Language examples
-
-* [Java](getting_started/java/README.md)
-* [Python](getting_started/python/README.md)
