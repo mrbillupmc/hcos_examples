@@ -23,9 +23,9 @@ import com.upmc.enterprises.hcos.model.SearchResult;
 public class DemoClientTest {
 
   private static String basePath;
-  private static String cognitoUrl;
-  private static String cognitoUsername;
-  private static String cognitoPassword;
+  private static String oauthBaseUrl;
+  private static String clientId;
+  private static String clientSecret;
   private static String tenantId;
 
   @BeforeClass
@@ -37,9 +37,9 @@ public class DemoClientTest {
         gson.fromJson(new FileReader("../configurations/Configuration.json"), mapType);
 
     basePath = map.get("baseUrl");
-    cognitoUrl = map.get("oauthBaseUrl");
-    cognitoUsername = map.get("clientId");
-    cognitoPassword = map.get("clientSecret");
+    oauthBaseUrl = map.get("oauthBaseUrl");
+    clientId = map.get("clientId");
+    clientSecret = map.get("clientSecret");
     tenantId = map.get("tenantId");
   }
 
@@ -54,9 +54,9 @@ public class DemoClientTest {
       System.out.println("search=[" + search + "]");
       DemoClient client = new DemoClient();
       client.setBasePath(basePath);
-      client.setOauthPassword(cognitoPassword);
-      client.setOauthUrl(cognitoUrl);
-      client.setOauthUsername(cognitoUsername);
+      client.setOauthPassword(clientSecret);
+      client.setOauthUrl(oauthBaseUrl);
+      client.setOauthUsername(clientId);
       client.setVerifyingSsl(true);
       client.setDebugging(false);
       SearchCriterion body = new SearchCriterion();
