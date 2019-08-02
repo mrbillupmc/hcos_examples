@@ -10,7 +10,7 @@ from requests_oauthlib import OAuth2, OAuth2Session
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def refresh_token(client_id, client_secret, token_url):
+def get_token(client_id, client_secret, token_url):
     client = BackendApplicationClient(client_id=client_id)
     oauth = OAuth2Session(client=client)
     token = oauth.fetch_token(
@@ -37,7 +37,7 @@ def demo():
     x_hcos_user_root = 'hcos.upmce.net'
     x_hcos_user_extension = 'username'
 
-    token = refresh_token(client_id, client_secret, token_url) # get an Oauth2 token
+    token = get_token(client_id, client_secret, token_url) # get an Oauth2 token
 
     configuration = hcos_client.Configuration()
     configuration.host = base_path
@@ -66,7 +66,7 @@ def demo():
                 x_hcos_user_extension=x_hcos_user_extension, 
                 tenant_id=tenant_id)
         except TokenExpiredError as e:
-            token = refresh_token(client_id, client_secret, token_url)
+            token = get_token(client_id, client_secret, token_url)
             search_result = search_api.post_search_by_kdsl(
                 body=search_example['query'], 
                 x_correlation_id=x_correlation_id, 
@@ -99,7 +99,7 @@ def demo():
                     document_root=document_root, 
                     document_extension=document_extension)
             except TokenExpiredError as e:
-                token = refresh_token(client_id, client_secret, token_url)
+                token = get_token(client_id, client_secret, token_url)
                 document_meta_data = document_api.get_document_by_root_extension(
                     x_correlation_id=x_correlation_id, 
                     x_hcos_user_root=x_hcos_user_root, 
