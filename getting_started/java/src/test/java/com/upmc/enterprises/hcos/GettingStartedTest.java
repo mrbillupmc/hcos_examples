@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,6 +28,9 @@ public class GettingStartedTest {
   private static String clientId;
   private static String clientSecret;
   private static String tenantId;
+  private static UUID correlationId;
+  private static String userRoot;
+  private static String userExtension;
 
   @BeforeClass
   public static void oneTimeSetUp() throws IOException {
@@ -36,50 +40,57 @@ public class GettingStartedTest {
     Map<String, String> map =
         gson.fromJson(new FileReader("../configurations/Configuration.json"), mapType);
 
-    basePath = map.get("baseUrl");
+    basePath = map.get("basePath");
     oauthBaseUrl = map.get("oauthBaseUrl");
     clientId = map.get("clientId");
     clientSecret = map.get("clientSecret");
     tenantId = map.get("tenantId");
+
+    // todo : add headers to calls
+    correlationId = UUID.randomUUID();
+    userRoot = "hcos.upmce.net";
+    userExtension = "username";
   }
 
   @Test
   public void runDemo() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
     System.out.println("Getting Started demo begins...");
+    
     Gson gson = new Gson();
     Type searchType = new TypeToken<List<Search>>() {}.getType();
-    List<Search> list = gson.fromJson(new FileReader("../Searches.json"), searchType);
-    System.out.println("search list size=[" + list.size() + "]");
-    for (Search search : list) {
-      System.out.println("search=[" + search + "]");
-      GettingStarted client = new GettingStarted();
-      client.setBasePath(basePath);
-      client.setOauthPassword(clientSecret);
-      client.setOauthUrl(oauthBaseUrl);
-      client.setOauthUsername(clientId);
-      client.setVerifyingSsl(true);
-      client.setDebugging(false);
-      SearchCriterion body = new SearchCriterion();
-      body.setCriterion(search.getQuery().get("criterion"));
-      SearchResult searchResult = client.postSearchByKDSL(body, tenantId);
-      // System.out.println("searchResult=[" + searchResult + "]");
-      assertNotNull(searchResult);
-      System.out.println("offset=[" + searchResult.getOffset() + "]");
-      System.out.println("record_count=[" + searchResult.getRecordCount() + "]");
-      System.out.println("total_record_count=[" + searchResult.getTotalRecordCount() + "]");
-      List<DocumentMeta> hits = searchResult.getHits();
-      int i = 1;
-      for (DocumentMeta hit : hits) {
-        DocumentMeta meta = client.getDocumentByRootExtension(tenantId, hit.getDocumentRoot(),
-            hit.getDocumentExtension(), "text/plain");
-        // System.out.println("meta=[" + meta + "]");
-        System.out.println("\t" + i + "\tdocument_root=[" + meta.getDocumentRoot() + "]");
-        System.out.println("\t\tdocument_extension=[" + meta.getDocumentExtension() + "]");
-        System.out
-            .println("\t\tdocument_type-description=[" + meta.getDocumentTypeDescription() + "]");
-        i++;
-      }
+    List<Search> searchExamples = gson.fromJson(new FileReader("../Searches.json"), searchType);
+    Search searchExample = searchExamples.get(0);
+    
+    System.out.println(searchExample.getDescription());
+    
+    GettingStarted client = new GettingStarted();
+    client.setBasePath(basePath);
+    client.setOauthPassword(clientSecret);
+    client.setOauthUrl(oauthBaseUrl);
+    client.setOauthUsername(clientId);
+    client.setVerifyingSsl(true);
+    client.setDebugging(false);
+    
+    SearchCriterion body = new SearchCriterion();
+    body.setCriterion(searchExample.getQuery().get("criterion"));
+    
+    SearchResult searchResult = client.postSearchByKDSL(body, tenantId);
+    assertNotNull(searchResult);
+    System.out.println("offset: " + searchResult.getOffset());
+    System.out.println("record_count:" + searchResult.getRecordCount());
+    System.out.println("total_record_count:" + searchResult.getTotalRecordCount());
+    
+    int index = 0;
+    for (DocumentMeta searchHit : searchResult.getHits()) {
+      System.out.println("" + index + " " + searchHit.getDocumentRoot() + "-" + searchHit.getDocumentExtension() + "-" + searchHit.getDocumentTypeExtension());
+
+      DocumentMeta documentMetaData = client.getDocumentByRootExtension(tenantId, searchHit.getDocumentRoot(), searchHit.getDocumentExtension(), "text/plain");
+      System.out.println("\tdocument_root: " + documentMetaData.getDocumentRoot());
+      System.out.println("\tdocument_extension: " + documentMetaData.getDocumentExtension());
+      System.out.println("\tdocument_type-description: " + documentMetaData.getDocumentTypeDescription());
+      index++;
     }
+
     System.out.println("Getting Started demo ends.");
   }
   
