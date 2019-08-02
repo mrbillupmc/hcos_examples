@@ -202,7 +202,7 @@ $ swagger-codegen config-help -l java
 ```
 
 # Use It!
-At this point the API classes should be able to be referenced in the target project.  See __DemoClient__ and __DemoClientTest__ for straightforward examples of usage.  If you have a proper ```Configuration.json``` file you should be able to run the example from the command line.
+At this point the API classes should be able to be referenced in the target project.  See __GettingStarted__ and __GettingStartedTest__ for straightforward examples of usage.  If you have a proper ```Configuration.json``` file you should be able to run the example from the command line.
 
 ```
 $ ./mvnw clean test

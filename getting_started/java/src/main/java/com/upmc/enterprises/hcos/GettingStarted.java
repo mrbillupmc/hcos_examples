@@ -25,7 +25,7 @@ import com.upmc.enterprises.hcos.model.DocumentMeta;
 import com.upmc.enterprises.hcos.model.SearchCriterion;
 import com.upmc.enterprises.hcos.model.SearchResult;
 
-public class DemoClient {
+public class GettingStarted {
 
   private OauthToken oauthToken;
 
@@ -198,5 +198,4 @@ public class DemoClient {
   public void setVerifyingSsl(boolean verifyingSsl) {
     this.verifyingSsl = verifyingSsl;
   }
-
 }

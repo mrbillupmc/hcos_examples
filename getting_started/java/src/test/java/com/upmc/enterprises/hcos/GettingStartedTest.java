@@ -20,7 +20,7 @@ import com.upmc.enterprises.hcos.model.DocumentMeta;
 import com.upmc.enterprises.hcos.model.SearchCriterion;
 import com.upmc.enterprises.hcos.model.SearchResult;
 
-public class DemoClientTest {
+public class GettingStartedTest {
 
   private static String basePath;
   private static String oauthBaseUrl;
@@ -52,7 +52,7 @@ public class DemoClientTest {
     System.out.println("search list size=[" + list.size() + "]");
     for (Search search : list) {
       System.out.println("search=[" + search + "]");
-      DemoClient client = new DemoClient();
+      GettingStarted client = new GettingStarted();
       client.setBasePath(basePath);
       client.setOauthPassword(clientSecret);
       client.setOauthUrl(oauthBaseUrl);
