@@ -90,8 +90,5 @@ public class GettingStartedTest {
       System.out.println("\tdocument_type-description: " + documentMetaData.getDocumentTypeDescription());
       index++;
     }
-
-    System.out.println("Getting Started demo ends.");
   }
-  
 }
