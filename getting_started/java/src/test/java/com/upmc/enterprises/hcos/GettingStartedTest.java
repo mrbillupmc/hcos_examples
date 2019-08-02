@@ -33,7 +33,7 @@ public class GettingStartedTest {
   private static String userExtension;
 
   @BeforeClass
-  public static void oneTimeSetUp() throws IOException {
+  public static void initialize() throws IOException {
     // one-time initialization code
     Gson gson = new Gson();
     Type mapType = new TypeToken<Map<String, String>>() {}.getType();
@@ -53,7 +53,7 @@ public class GettingStartedTest {
   }
 
   @Test
-  public void runDemo() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
+  public void demo() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
     System.out.println("Getting Started demo begins...");
     
     Gson gson = new Gson();
@@ -63,18 +63,18 @@ public class GettingStartedTest {
     
     System.out.println(searchExample.getDescription());
     
-    GettingStarted client = new GettingStarted();
-    client.setBasePath(basePath);
-    client.setOauthPassword(clientSecret);
-    client.setOauthUrl(oauthBaseUrl);
-    client.setOauthUsername(clientId);
-    client.setVerifyingSsl(true);
-    client.setDebugging(false);
-    
+    GettingStarted demo = new GettingStarted(
+            basePath,
+            clientId,
+            clientSecret,
+            oauthBaseUrl,
+            true,
+            false);
+
     SearchCriterion body = new SearchCriterion();
     body.setCriterion(searchExample.getQuery().get("criterion"));
     
-    SearchResult searchResult = client.postSearchByKDSL(body, tenantId);
+    SearchResult searchResult = demo.postSearchByKDSL(correlationId, userRoot, userExtension, body, tenantId);
     assertNotNull(searchResult);
     System.out.println("offset: " + searchResult.getOffset());
     System.out.println("record_count:" + searchResult.getRecordCount());
@@ -84,7 +84,7 @@ public class GettingStartedTest {
     for (DocumentMeta searchHit : searchResult.getHits()) {
       System.out.println("" + index + " " + searchHit.getDocumentRoot() + "-" + searchHit.getDocumentExtension() + "-" + searchHit.getDocumentTypeExtension());
 
-      DocumentMeta documentMetaData = client.getDocumentByRootExtension(tenantId, searchHit.getDocumentRoot(), searchHit.getDocumentExtension(), "text/plain");
+      DocumentMeta documentMetaData = demo.getDocumentByRootExtension(correlationId, userRoot, userExtension, tenantId, searchHit.getDocumentRoot(), searchHit.getDocumentExtension(), "text/plain");
       System.out.println("\tdocument_root: " + documentMetaData.getDocumentRoot());
       System.out.println("\tdocument_extension: " + documentMetaData.getDocumentExtension());
       System.out.println("\tdocument_type-description: " + documentMetaData.getDocumentTypeDescription());

@@ -3,6 +3,7 @@ package com.upmc.enterprises.hcos;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.JWTDecodeException;
@@ -30,13 +31,43 @@ public class GettingStarted {
   private OauthToken oauthToken;
 
   private String basePath;
-  private String oauthUrl;
-  private String oauthUsername;
-  private String oauthPassword;
+  private String oauthBaseUrl;
+  private String clientId;
+  private String clientSecret;
   private boolean debugging = false;
   private boolean verifyingSsl = true;
 
-  public SearchResult postSearchByKDSL(SearchCriterion body, String tenantId) {
+  private ApiClient apiClient;
+  SearchApi searchApi;
+  DocumentApi documentApi;
+
+  public GettingStarted(
+          String basePath,
+          String clientId,
+          String clientSecret,
+          String oauthBaseUrl,
+          Boolean verifyingSsl,
+          Boolean debugging) {
+    this.basePath = basePath;
+    this.clientId = clientId;
+    this.clientSecret = clientSecret;
+    this.oauthBaseUrl  = oauthBaseUrl;
+    this.verifyingSsl = verifyingSsl;
+    this.debugging = debugging;
+
+    apiClient = new ApiClient();
+    apiClient.setBasePath(basePath);
+    apiClient.setVerifyingSsl(verifyingSsl);
+
+    apiClient.setDebugging(debugging);
+    apiClient.setConnectTimeout(0);
+    apiClient.setReadTimeout(0);
+
+    searchApi = new SearchApi(apiClient=apiClient);
+    documentApi = new DocumentApi(apiClient=apiClient);
+  }
+
+  public SearchResult postSearchByKDSL(UUID correlationId, String userRoot, String userExtension, SearchCriterion body, String tenantId) {
     SearchResult searchResult = null;
     if (tenantId != null && tenantId.trim().length() > 0 && body != null) {
       String token = null;
@@ -46,16 +77,9 @@ public class GettingStarted {
         e1.printStackTrace();
       }
       if (token != null) {
-        SearchApi client = new SearchApi();
-        client.getApiClient().setDebugging(debugging);
-        client.getApiClient().setVerifyingSsl(verifyingSsl);
-        client.getApiClient().setBasePath(basePath);
-        client.getApiClient().setAccessToken(token);
-        client.getApiClient().setConnectTimeout(0);
-        client.getApiClient().setReadTimeout(0);
         try {
-          searchResult = client.postSearchByKDSL(body, "correlationId", "xHcosUserRoot",
-              "xHcosUserExtension", tenantId, null, null, null);
+          searchApi.getApiClient().setAccessToken(token);
+          searchResult = searchApi.postSearchByKDSL(body, correlationId.toString(), userRoot, userExtension, tenantId, null, null, null);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -64,8 +88,8 @@ public class GettingStarted {
     return searchResult;
   }
 
-  public DocumentMeta getDocumentByRootExtension(String tenantId, String documentRoot,
-      String documentExtension, String acceptHeaderValue) {
+  public DocumentMeta getDocumentByRootExtension(UUID correlationId, String userRoot, String userExtension, String tenantId, String documentRoot,
+    String documentExtension, String acceptHeaderValue) {
     DocumentMeta meta = null;
     String token = null;
     try {
@@ -74,21 +98,14 @@ public class GettingStarted {
       e1.printStackTrace();
     }
     if (token != null) {
-      DocumentApi client = new DocumentApi();
       if (acceptHeaderValue != null && acceptHeaderValue.length() > 0) {
         HeaderInterceptor interceptor = new HeaderInterceptor();
         interceptor.setAcceptHeaderValue(acceptHeaderValue);
-        client.getApiClient().getHttpClient().interceptors().add(interceptor);
+        documentApi.getApiClient().setAccessToken(token);
+        documentApi.getApiClient().getHttpClient().interceptors().add(interceptor);
       }
-      client.getApiClient().setDebugging(debugging);
-      client.getApiClient().setVerifyingSsl(verifyingSsl);
-      client.getApiClient().setBasePath(basePath);
-      client.getApiClient().setAccessToken(token);
-      client.getApiClient().setConnectTimeout(0);
-      client.getApiClient().setReadTimeout(0);
       try {
-        meta = client.getDocumentByRootExtension("xCorrelationId", "xHcosUserRoot",
-            "xHcosUserExtension", tenantId, documentRoot, documentExtension);
+        meta = documentApi.getDocumentByRootExtension(correlationId.toString(), userRoot, userExtension, tenantId, documentRoot, documentExtension);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -107,14 +124,14 @@ public class GettingStarted {
         loggingInterceptor.setLevel(Level.BODY);
         client.interceptors().add(loggingInterceptor);
       }
-      HttpUrl.Builder urlBuilder = HttpUrl.parse(oauthUrl + "/oauth2/token").newBuilder();
+      HttpUrl.Builder urlBuilder = HttpUrl.parse(oauthBaseUrl + "/oauth2/token").newBuilder();
       urlBuilder.addQueryParameter("grant_type", "client_credentials").addQueryParameter("scope",
           "");
       String url = urlBuilder.build().toString();
       String postBody = "";
       Request request = new Request.Builder().url(url)
           .addHeader("Content-Type", "application/x-www-form-urlencoded")
-          .addHeader("Authorization", Credentials.basic(oauthUsername, oauthPassword))
+          .addHeader("Authorization", Credentials.basic(clientId, clientSecret))
           .post(RequestBody.create(
               MediaType.parse("application/x-www-form-urlencoded; charset=utf-8"), postBody))
           .build();
@@ -141,61 +158,5 @@ public class GettingStarted {
       }
     }
     return token;
-  }
-
-  public OauthToken getOauthToken() {
-    return oauthToken;
-  }
-
-  public void setOauthToken(OauthToken oauthToken) {
-    this.oauthToken = oauthToken;
-  }
-
-  public String getBasePath() {
-    return basePath;
-  }
-
-  public void setBasePath(String basePath) {
-    this.basePath = basePath;
-  }
-
-  public String getOauthUrl() {
-    return oauthUrl;
-  }
-
-  public void setOauthUrl(String oauthUrl) {
-    this.oauthUrl = oauthUrl;
-  }
-
-  public String getOauthUsername() {
-    return oauthUsername;
-  }
-
-  public void setOauthUsername(String oauthUsername) {
-    this.oauthUsername = oauthUsername;
-  }
-
-  public String getOauthPassword() {
-    return oauthPassword;
-  }
-
-  public void setOauthPassword(String oauthPassword) {
-    this.oauthPassword = oauthPassword;
-  }
-
-  public boolean isDebugging() {
-    return debugging;
-  }
-
-  public void setDebugging(boolean debugging) {
-    this.debugging = debugging;
-  }
-
-  public boolean isVerifyingSsl() {
-    return verifyingSsl;
-  }
-
-  public void setVerifyingSsl(boolean verifyingSsl) {
-    this.verifyingSsl = verifyingSsl;
   }
 }
