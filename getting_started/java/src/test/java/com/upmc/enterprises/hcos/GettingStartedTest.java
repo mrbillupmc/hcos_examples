@@ -34,7 +34,6 @@ public class GettingStartedTest {
 
   @BeforeClass
   public static void initialize() throws IOException {
-    // one-time initialization code
     Gson gson = new Gson();
     Type mapType = new TypeToken<Map<String, String>>() {}.getType();
     Map<String, String> map =
@@ -46,7 +45,7 @@ public class GettingStartedTest {
     clientSecret = map.get("clientSecret");
     tenantId = map.get("tenantId");
 
-    // todo : add headers to calls
+    // TODO : add headers to calls
     correlationId = UUID.randomUUID();
     userRoot = "hcos.upmce.net";
     userExtension = "username";
@@ -55,40 +54,41 @@ public class GettingStartedTest {
   @Test
   public void demo() throws JsonIOException, JsonSyntaxException, FileNotFoundException {
     System.out.println("Getting Started demo begins...");
-    
+
     Gson gson = new Gson();
     Type searchType = new TypeToken<List<Search>>() {}.getType();
     List<Search> searchExamples = gson.fromJson(new FileReader("../Searches.json"), searchType);
     Search searchExample = searchExamples.get(0);
-    
+
     System.out.println(searchExample.getDescription());
-    
-    GettingStarted demo = new GettingStarted(
-            basePath,
-            clientId,
-            clientSecret,
-            oauthBaseUrl,
-            true,
-            false);
+
+    GettingStarted demo =
+        new GettingStarted(basePath, clientId, clientSecret, oauthBaseUrl, true, false);
 
     SearchCriterion body = new SearchCriterion();
     body.setCriterion(searchExample.getQuery().get("criterion"));
-    
-    SearchResult searchResult = demo.postSearchByKDSL(correlationId, userRoot, userExtension, body, tenantId);
+
+    SearchResult searchResult =
+        demo.postSearchByKDSL(correlationId, userRoot, userExtension, body, tenantId);
     assertNotNull(searchResult);
     System.out.println("offset: " + searchResult.getOffset());
     System.out.println("record_count:" + searchResult.getRecordCount());
     System.out.println("total_record_count:" + searchResult.getTotalRecordCount());
-    
+
     int index = 0;
     for (DocumentMeta searchHit : searchResult.getHits()) {
-      System.out.println("" + index + " " + searchHit.getDocumentRoot() + "-" + searchHit.getDocumentExtension() + "-" + searchHit.getDocumentTypeExtension());
+      System.out.println("" + index + " " + searchHit.getDocumentRoot() + "-"
+          + searchHit.getDocumentExtension() + "-" + searchHit.getDocumentTypeExtension());
 
-      DocumentMeta documentMetaData = demo.getDocumentByRootExtension(correlationId, userRoot, userExtension, tenantId, searchHit.getDocumentRoot(), searchHit.getDocumentExtension(), "text/plain");
+      DocumentMeta documentMetaData =
+          demo.getDocumentByRootExtension(correlationId, userRoot, userExtension, tenantId,
+              searchHit.getDocumentRoot(), searchHit.getDocumentExtension(), "text/plain");
       System.out.println("\tdocument_root: " + documentMetaData.getDocumentRoot());
       System.out.println("\tdocument_extension: " + documentMetaData.getDocumentExtension());
-      System.out.println("\tdocument_type-description: " + documentMetaData.getDocumentTypeDescription());
+      System.out
+          .println("\tdocument_type-description: " + documentMetaData.getDocumentTypeDescription());
       index++;
     }
+    System.out.println("Getting Started demo ends.");
   }
 }

@@ -29,8 +29,8 @@ getting_started/java/nbdist/
 getting_started/java/.nb-gradle/
 
 ### hcos-api ###
-getting_started/hcos-api/target
-getting_started/hcos-api/hcos-api-generated
+getting_started/java/hcos-api/target
+getting_started/java/hcos-api/hcos-api-generated
 #End Java example stuff
 
 

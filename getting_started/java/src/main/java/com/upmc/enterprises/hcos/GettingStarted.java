@@ -41,33 +41,29 @@ public class GettingStarted {
   SearchApi searchApi;
   DocumentApi documentApi;
 
-  public GettingStarted(
-          String basePath,
-          String clientId,
-          String clientSecret,
-          String oauthBaseUrl,
-          Boolean verifyingSsl,
-          Boolean debugging) {
+  public GettingStarted(String basePath, String clientId, String clientSecret, String oauthBaseUrl,
+      Boolean verifyingSsl, Boolean debugging) {
     this.basePath = basePath;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
-    this.oauthBaseUrl  = oauthBaseUrl;
+    this.oauthBaseUrl = oauthBaseUrl;
     this.verifyingSsl = verifyingSsl;
     this.debugging = debugging;
 
     apiClient = new ApiClient();
-    apiClient.setBasePath(basePath);
-    apiClient.setVerifyingSsl(verifyingSsl);
+    apiClient.setBasePath(this.basePath);
+    apiClient.setVerifyingSsl(this.verifyingSsl);
 
     apiClient.setDebugging(debugging);
     apiClient.setConnectTimeout(0);
     apiClient.setReadTimeout(0);
 
-    searchApi = new SearchApi(apiClient=apiClient);
-    documentApi = new DocumentApi(apiClient=apiClient);
+    searchApi = new SearchApi(apiClient);
+    documentApi = new DocumentApi(apiClient);
   }
 
-  public SearchResult postSearchByKDSL(UUID correlationId, String userRoot, String userExtension, SearchCriterion body, String tenantId) {
+  public SearchResult postSearchByKDSL(UUID correlationId, String userRoot, String userExtension,
+      SearchCriterion body, String tenantId) {
     SearchResult searchResult = null;
     if (tenantId != null && tenantId.trim().length() > 0 && body != null) {
       String token = null;
@@ -79,7 +75,8 @@ public class GettingStarted {
       if (token != null) {
         try {
           searchApi.getApiClient().setAccessToken(token);
-          searchResult = searchApi.postSearchByKDSL(body, correlationId.toString(), userRoot, userExtension, tenantId, null, null, null);
+          searchResult = searchApi.postSearchByKDSL(body, correlationId.toString(), userRoot,
+              userExtension, tenantId, null, null, null);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -88,8 +85,9 @@ public class GettingStarted {
     return searchResult;
   }
 
-  public DocumentMeta getDocumentByRootExtension(UUID correlationId, String userRoot, String userExtension, String tenantId, String documentRoot,
-    String documentExtension, String acceptHeaderValue) {
+  public DocumentMeta getDocumentByRootExtension(UUID correlationId, String userRoot,
+      String userExtension, String tenantId, String documentRoot, String documentExtension,
+      String acceptHeaderValue) {
     DocumentMeta meta = null;
     String token = null;
     try {
@@ -105,7 +103,8 @@ public class GettingStarted {
         documentApi.getApiClient().getHttpClient().interceptors().add(interceptor);
       }
       try {
-        meta = documentApi.getDocumentByRootExtension(correlationId.toString(), userRoot, userExtension, tenantId, documentRoot, documentExtension);
+        meta = documentApi.getDocumentByRootExtension(correlationId.toString(), userRoot,
+            userExtension, tenantId, documentRoot, documentExtension);
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -130,7 +129,6 @@ public class GettingStarted {
       String url = urlBuilder.build().toString();
       String postBody = "";
       Request request = new Request.Builder().url(url)
-          .addHeader("Content-Type", "application/x-www-form-urlencoded")
           .addHeader("Authorization", Credentials.basic(clientId, clientSecret))
           .post(RequestBody.create(
               MediaType.parse("application/x-www-form-urlencoded; charset=utf-8"), postBody))

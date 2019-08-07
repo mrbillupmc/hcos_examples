@@ -1,119 +1,482 @@
-openapi: 3.0.0
+openapi: "3.0.1"
 info:
-  version: '2.0.0'
-  title: 'hcOS Developer Experience'
-  description: 'hcOS Developer Experience API'
-tags:
-- name: Document
-  description: Document operations.
-- name: Search
-  description: Searching operations.
+  title: "hcOS API Gateway"
+  version: "v2"
 servers:
-  - description: This server
-    url: /
+- url: "https://dev.hcos.upmce.net"
+tags:
+- name: OAuth
+  description: hcOS API Gateway OAuth server
+- name: Document
+  description: hcOS API Gateway document server
+- name: Search
+  description: hcOS API Gateway document search server
 paths:
-  /api/v2/{tenant_id}/document/root/{document_root}/extension/{document_extension}:
-    get:
-      operationId: getDocumentByRootExtension
-      summary: Requests current primary document by document root, extension.
-      security: 
-        - oAuth2ClientCredentials:
-          - http://hcos.com/upmc_provider:system:Document.*
+  /oauth/token:
+    post:
+      operationId: getToken
+      summary: Get JWT
+      description: >
+        Returns a JWT using client credentials flow. Your client ID and
+        client secret can be added to the request form or to the
+        Authorization header using basic auth.
+
+
+        Scopes can be requested by using a comma seperated string
+        (scope1, scope2, scope3). All assigned scopes are returned in
+        the JWT if no scopes are listed in the request form.
       tags:
-        - Document
+        - OAuth
       parameters:
-        - in: header
-          name: x-correlation-id
-          schema:
-              type: string
-              example: 8e71f9f9-e6cd-40b4-8fb4-1b499c0e2f3f
-          required: true
-        - in: header
-          name: x-hcos-user-root
-          schema:
-              type: string
-              example: hcos.upmce.net
-          required: true
-        - in: header
-          name: x-hcos-user-extension
-          schema:
-              type: string
-              example: doej
-          required: true
-        - in: path
-          name: tenant_id
-          schema:
-            type: string
-            example: mimic
-          required: true
-        - in: path
-          name: document_root
-          schema:
-            type: string
-            example: MIMIC.DOCUMENT.OID
-          required: true
-        - in: path
-          name: document_extension
-          schema:
-            type: string
-            example: 1
-          required: true
+      - name: "Authorization"
+        description: Basic Auth
+        in: "header"
+        schema:
+          type: "string"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
       responses:
-        '200':    # status code
-          description: Requested current primary document for given document root and extension.
+        200:
+          description: "200 response"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentMeta'
-  /api/v2/{tenant_id}/document/root/{document_root}/extension/{document_extension}/data:
+                $ref: "#/components/schemas/Token"
+        400:
+          description: "400 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthError"
+  /api/beta-v2/{tenant-id}/patient/root/{patient-root}/extension/{patient-extension}/documents:
+    post:
+      operationId: searchPatientDocuments
+      summary: Search a patient's documents.
+      description: >
+        Returns all of a patient's documents that match the search criteria.
+      tags:
+        - Search
+      parameters:
+      - name: "tenant-id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "patient-root"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "from"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "user-extension"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      - name: "patient-extension"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "size"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "user-root"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Search"
+        required: true
+      responses:
+        200:
+          description: "200 response"
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentSearchResponse"
+        400:
+          description: "400 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: "401 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: "403 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: "404 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: "500 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - hcOS_Dev_Cognito:
+        - "http://hcos.upmce.net/upmc/system/API.access"
+  /api/v2/{tenant-id}/patient/root/{patient-root}/extension/{patient-extension}/documents:
     get:
-      operationId: getDocumentDataByRootExtension
-      summary: Requests document data by document root, extension.
-      security: 
-        - oAuth2ClientCredentials:
-          - http://hcos.com/upmc_provider:system:Document.*
+      operationId: getPatientDocuments
+      summary: Get all patient documents.
+      description: >
+        Returns all the document for the given patient.
       tags:
         - Document
       parameters:
-        - in: header
-          name: x-correlation-id
-          schema:
-              type: string
-              example: 8e71f9f9-e6cd-40b4-8fb4-1b499c0e2f3f
-          required: true
-        - in: header
-          name: x-hcos-user-root
-          schema:
-              type: string
-              example: hcos.upmce.net
-          required: true
-        - in: header
-          name: x-hcos-user-extension
-          schema:
-              type: string
-              example: doej
-          required: true
-        - in: path
-          name: tenant_id
-          schema:
-            type: string
-            example: mimic
-          required: true
-        - in: path
-          name: document_root
-          schema:
-            type: string
-            example: MIMIC.DOCUMENT.OID
-          required: true
-        - in: path
-          name: document_extension
-          schema:
-            type: string
-            example: 1
-          required: true
+      - name: "patient-root"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "patient-extension"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "tenant-id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "from"
+        description: Page number
+        in: "query"
+        schema:
+          type: "string"
+      - name: "size"
+        description: Documents per page
+        in: "query"
+        schema:
+          type: "string"
+      - name: "date-to"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "date-from"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "sort-order"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "sort-field"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "user-root"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      - name: "user-extension"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
       responses:
-        '200':    # status code
-          description: Requested current primary document formatted data by document root and extension.
+        200:
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentSearchResponse"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/Empty"
+        400:
+          description: "400 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: "401 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: "403 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: "404 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: "500 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - hcOS_Dev_Cognito:
+        - "http://hcos.upmce.net/upmc/system/API.access"
+  /api/v2/{tenant-id}/patient/root/{patient-root}/extension/{patient-extension}/documents/search:
+    get:
+      operationId: searchPatientDocumentsByLiteralText
+      summary: Search a patient's documents.
+      description: >
+        Returns all of a patient's documents that match the search criteria.
+      tags:
+        - Search
+      parameters:
+      - name: "patient-root"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "patient-extension"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "tenant-id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "literal"
+        description: Search criteria
+        in: "query"
+        required: true
+        schema:
+          type: "string"
+      - name: "snippet"
+        in: "query"
+        schema:
+          type: "string"
+      - name: "from"
+        description: Page number
+        in: "query"
+        schema:
+          type: "string"
+      - name: "size"
+        description: Documents per page
+        in: "query"
+        schema:
+          type: "string"
+      - name: "user-root"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      - name: "user-extension"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentSearchResponse"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/Empty"
+        400:
+          description: "400 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: "401 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: "403 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: "404 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: "500 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - hcOS_Dev_Cognito:
+        - "http://hcos.upmce.net/upmc/system/API.access"
+  /api/v2/{tenant-id}/document/root/{document-root}/extension/{document-extension}:
+    get:
+      operationId: getDocumentByRootExtension
+      summary: Requests current primary document by document root, extension.
+      description: |
+        For testing purposes use the following values,
+        * **tenant_id:** mimic
+        * **document_root:** MIMIC.DOCUMENT.OID
+        * **document_extension:** 1
+      tags:
+        - Document
+      parameters:
+      - name: "document-root"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "accept"
+        in: "header"
+        schema:
+          type: "string"
+      - name: "tenant-id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "user-extension"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      - name: "content-type"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      - name: "document-extension"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "user-root"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        404:
+          description: "404 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        200:
+          description: "Requested current primary document for given document root and extension."
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+            text/xml:
+              schema:
+                $ref: "#/components/schemas/Empty"
+        400:
+          description: "400 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        401:
+          description: "401 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: "500 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: "403 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - hcOS_Dev_Cognito:
+        - "http://hcos.upmce.net/upmc/system/API.access"
+  /api/v2/{tenant-id}/document/{document-id}/data:
+    get:
+      operationId: getDocumentData
+      summary: Get document by document ID.
+      description: >
+        Returns the document that corresponds with the given ID.
+
+
+        If no or unsupported accept header is given, then the
+        document is returned in the format is was originally saved.
+      tags:
+        - Document
+      parameters:
+      - name: "document-id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "tenant-id"
+        in: "path"
+        required: true
+        schema:
+          type: "string"
+      - name: "user-root"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      - name: "user-extension"
+        in: "header"
+        required: true
+        schema:
+          type: "string"
+      responses:
+        200:
+          description: "200 response"
+          headers:
+            Content-Type:
+              schema:
+                type: "string"
           content:
             text/plain:
               schema:
@@ -125,429 +488,365 @@ paths:
               schema:
                 type: string
                 format: binary
-  /api/v2/{tenant_id}/documents/search:
-    post:
-      operationId: postSearchByKDSL
-      summary: Requests documents by KDSL.
-      security: 
-        - oAuth2ClientCredentials:
-          - http://hcos.com/upmc_provider:system:Search.*
-      tags:
-        - Search
-      parameters:
-        - in: header
-          name: x-correlation-id
-          schema:
-              type: string
-              example: 8e71f9f9-e6cd-40b4-8fb4-1b499c0e2f3f
-          required: true
-        - in: header
-          name: x-hcos-user-root
-          schema:
-              type: string
-              example: hcos.upmce.net
-          required: true
-        - in: header
-          name: x-hcos-user-extension
-          schema:
-              type: string
-              example: doej
-          required: true
-        - in: path
-          name: tenant_id
-          schema:
-            type: string
-            example: mimic
-          required: true
-        - in: query
-          name: from
-          schema:
-            type: integer
-            example: 0
-          required: false
-        - in: query
-          name: size
-          schema:
-            type: integer
-            example: 10
-          required: false
-        - in: query
-          name: snippet
-          schema:
-            type: string
-            enum:
-              - on
-              - off
-            example: off
-          required: false
-      requestBody:
-        required: true
-        content:
-          application/json:
-            example: { "criterion" : "literal='ulcerative colitis'" }
-            schema:
-              $ref: '#/components/schemas/SearchCriterion'
-      responses:
-        '200':    # status code
-          description: Requested document set.
+        400:
+          description: "400 response"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SearchResult'
+                $ref: "#/components/schemas/Error"
+        401:
+          description: "401 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        403:
+          description: "403 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        404:
+          description: "404 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        500:
+          description: "500 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+      - hcOS_Dev_Cognito:
+        - "http://hcos.upmce.net/upmc/system/API.access"
 components:
-  securitySchemes:
-    oAuth2ClientCredentials:
-      type: oauth2
-      description: OAuth token generated from API Gateway Cognito
-      flows: 
-        clientCredentials: 
-          #tokenUrl: https://upmce-hcos-apigateway-dev.auth.us-east-1.amazoncognito.com/oauth2/token 
-          tokenUrl: https://hcos-labs-dev.auth.us-east-1.amazoncognito.com/oauth2/token
-          scopes:
-            http://hcos.com/upmc_provider:system:Document.*: Grants RW access to Documents API.
-            http://hcos.com/upmc_provider:system:Patient.*: Grants RW access to Patient API.
-            http://hcos.com/upmc_provider:system:Search.*: Grants access to Search API.
-            http://hcos.com/Skunkwork.*: Skunkworks
   schemas:
-    SkunworkResponse:
-        type: object
-        properties:
-          message:
-            type: string
-    DataStatus:
-      type: string
+    ContentType:
+      title: "Content Type"
+      type: "string"
       enum:
-        - new
-        - valid
-        - not_applicable
-        - invalid
-        - deleted
-        - retrieve_error
+      - "text/hl7"
+      - "text/plain"
+      - "text/rtf"
+      - "text/html"
+      - "application/rtf"
+      - "application/pdf"
+      - "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      - "application/msword"
+      - "application/hl7-v3+xml"
     DataPrecedence:
-      type: string
+      title: "Data Precedence"
+      type: "string"
       enum:
-        - originator
-        - primary
-        - secondary
-    DataFormat:
-      type: string
+      - "originator"
+      - "primary"
+      - "secondary"
+    DataStatus:
+      title: "Data Status"
+      type: "string"
       enum:
-        - text/hl7
-        - text/plain
-        - text/rtf
-        - text/html
-        - application/rtf
-        - application/pdf
-        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
-        - application/msword
-        - application/hl7-v3+xml
-    Gender:
-      type: string
-      enum:
-        - male
-        - female
-        - ambiguous
-        - other
-        - not_applicable
-        - unknown
+      - "new"
+      - "valid"
+      - "not_applicable"
+      - "invalid"
+      - "deleted"
+      - "retrieve_error"
     DocumentStatus:
-      type: string
+      title: "Document Status"
+      type: "string"
       enum:
-        - unknown
-        - preliminary
-        - final
-        - corrected
-        - addendum
-        - in_error
-        - cancelled
-    ConfidentialityCode:
-      type: string
-      enum:
-        - unknown
-        - unrestricted
-        - restricted
-        - very_restricted
+      - "unknown"
+      - "preliminary"
+      - "final"
+      - "corrected"
+      - "addendum"
+      - "in_error"
+      - "cancelled"
     PersonRole:
-      type: string
+      title: "Confidentiality Code"
+      type: "string"
       enum:
-        - admitting
-        - attending
-        - authoring
-        - authenticating
-        - consulting
-        - interpreting
-        - ordering
-        - performing
-        - receiving
-        - referring
-        - transcribing
-        - unknown
-    Person:
-      type: object
+      - "admitting"
+      - "attending"
+      - "authoring"
+      - "authenticating"
+      - "consulting"
+      - "interpreting"
+      - "ordering"
+      - "performing"
+      - "receiving"
+      - "referring"
+      - "transcribing"
+      - "unknown"
+    Empty:
+      title: "Empty Response"
+      type: "object"
+    Error:
+      title: "Error Response"
+      type: "object"
+      properties:
+        message:
+          type: "string"
+        errors:
+          type: "array"
+          items:
+            type: "string"
+    OAuthError:
+      title: "OAuth Error Response"
+      type: "object"
+      properties:
+        error:
+          type: "string"
+    Search:
+      title: "KDSL Search Object"
       required:
-        - role
-        - root
-        - extension
-      properties:
-        role:
-          $ref: '#/components/schemas/PersonRole'
-        root:
-          type: string
-        extension:
-          type: string
-        last_name:
-          type: string
-        first_name:
-          type: string
-        middle_name:
-          type: string
-    DocumentMeta:
-      type: object
-      properties:
-        id:
-          type: string
-        root:
-          type: string
-        extension:
-          type: string
-        extension_suffix:
-          type: string
-        updated_at:
-          type: string
-          format: date-time
-        created_at:
-          type: string
-          format: date-time
-        date_of_service:
-          type: string
-        received_in_repository_at:
-          type: string
-        data_format:
-         $ref: '#/components/schemas/DataFormat'
-        data_status:
-          $ref: '#/components/schemas/DataStatus'
-        data_precedence:
-          $ref: '#/components/schemas/DataPrecedence'
-        patient_root:
-          type: string
-        patient_extension:
-          type: string
-        document_root:
-          type: string
-        document_extension:
-          type: string
-        document_status:
-          $ref: '#/components/schemas/DocumentStatus'
-        document_type_root:
-          type: string
-        document_type_extension:
-          type: string
-        document_type_description:
-          type: string
-        baseline_document_type_root:
-          type: string
-        baseline_document_type_extension:
-          type: string
-        baseline_document_type_description:
-          type: string
-        document_type_of_service_root:
-          type: string
-        document_type_of_service_extension:
-          type: string
-        document_type_of_service_description:
-          type: string
-        document_kind_of_document_root:
-          type: string
-        document_kind_of_document_extension:
-          type: string
-        document_subject_matter_domain_root:
-          type: string
-        document_subject_matter_domain_extension:
-          type: string
-        facility_root:
-          type: string
-        facility_extension:
-          type: string
-        facility_baseline_root:
-          type: string
-        facility_baseline_extension:
-          type: string
-        visit_root:
-          type: string
-        visit_extension:
-          type: string
-        provider:
-          type: string
-        document_admitting_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_attending_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_authenticating_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_authoring_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_consulting_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_interpreting_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_ordering_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_performing_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_receiving_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_referring_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_transcribing_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        document_unknown_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_admitting_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_attending_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_authenticating_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_authoring_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_consulting_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_interpreting_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_ordering_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_performing_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_receiving_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_referring_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_transcribing_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-        visit_unknown_person:
-          type: array
-          items:
-            $ref: '#/components/schemas/Person'
-    SearchCriterion:
-      type: object
+      - "criterion"
+      type: "object"
       properties:
         criterion:
-          type: string
-    SearchDocument:
-      type: object
+          type: "string"
+          format: "non-blank"
+    Person:
+      title: "Person"
+      required:
+      - "extension"
+      - "role"
+      - "root"
+      type: "object"
       properties:
-        kamioka_updated_at:
-          type: string
-          format: date-time
+        role:
+          $ref: "#/components/schemas/PersonRole"
+        root:
+          type: "string"
+        extension:
+          type: "string"
+        last_name:
+          type: "string"
+        first_name:
+          type: "string"
+        middle_name:
+          type: "string"
+    Document:
+      title: "Document"
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        root:
+          type: "string"
+        extension:
+          type: "string"
+        extension_suffix:
+          type: "string"
+        updated_at:
+          type: "string"
+          format: "date-time"
+        created_at:
+          type: "string"
+          format: "date-time"
+        date_of_service:
+          type: "string"
+        received_in_repository_at:
+          type: "string"
+        data_format:
+          $ref: "#/components/schemas/ContentType"
+        data_status:
+          $ref: "#/components/schemas/DataStatus"
+        data_precedence:
+          $ref: "#/components/schemas/DataPrecedence"
         patient_root:
-          type: string
+          type: "string"
         patient_extension:
-          type: string
-        patient_cluster_id:
-          type: string
-        patient_last_name:
-          type: string
-        patient_first_name:
-          type: string
-        patient_middle_name:
-          type: string
-        patient_birthdate:
-          type: string
-          format: date
-        patient_age_at_document_date:
-          type: integer
-        patient_gender:
-          $ref: '#/components/schemas/Gender'
+          type: "string"
         document_root:
-          type: string
+          type: "string"
         document_extension:
-          type: string
+          type: "string"
+        document_status:
+          $ref: "#/components/schemas/DocumentStatus"
         document_type_root:
-          type: string
+          type: "string"
         document_type_extension:
-          type: string
-        facility_root:
-          type: string
-        facility_extension:
-          type: string
-        document_kind_of_document_root:
-          type: string
-        document_kind_of_document_extension:
-          type: string
+          type: "string"
+        document_type_description:
+          type: "string"
+        baseline_document_type_root:
+          type: "string"
+        baseline_document_type_extension:
+          type: "string"
+        baseline_document_type_description:
+          type: "string"
         document_type_of_service_root:
-          type: string
+          type: "string"
         document_type_of_service_extension:
-          type: string
+          type: "string"
+        document_type_of_service_description:
+          type: "string"
+        document_kind_of_document_root:
+          type: "string"
+        document_kind_of_document_extension:
+          type: "string"
         document_subject_matter_domain_root:
-          type: string
+          type: "string"
         document_subject_matter_domain_extension:
-          type: string
-        modality:
-          type: string
-        body_location:
-          type: string
-        source_created_at:
-          type: string
-          format: date-time
-        source_updated_at:
-          type: string
-          format: date-time
-    SearchResult:
-      type: object
+          type: "string"
+        facility_root:
+          type: "string"
+        facility_extension:
+          type: "string"
+        facility_baseline_root:
+          type: "string"
+        facility_baseline_extension:
+          type: "string"
+        visit_root:
+          type: "string"
+        visit_extension:
+          type: "string"
+        provider:
+          type: "string"
+        document_admitting_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_attending_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_authenticating_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_authoring_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_consulting_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_interpreting_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_ordering_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_performing_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_receiving_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_referring_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_transcribing_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        document_unknown_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_admitting_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_attending_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_authenticating_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_authoring_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_consulting_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_interpreting_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_ordering_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_performing_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_receiving_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_referring_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_transcribing_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+        visit_unknown_person:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Person"
+    DocumentSearchResponse:
+      title: "Document Search Response"
+      type: "object"
       properties:
-        offset:
-          type: integer
-        record_count:
-          type: integer
+        records:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Document"
         total_record_count:
-          type: integer
-        hits:
+          type: "integer"
+        record_count:
+          type: "integer"
+        offset:
+          type: "integer"
+    Token:
+      title: "Cognito JWT"
+      type: "object"
+      properties:
+        access_token:
+          type: "string"
+        expires_in:
+          type: "integer"
+        token_type:
+          type: "string"
+    TokenRequest:
+      title: "Token Request Form"
+      properties:
+        grant_type:
+          type: string
+        scope:
           type: array
           items:
-            $ref: '#/components/schemas/DocumentMeta'
+            type: string
+        client_id:
+          type: string
+        client_secret:
+          type: string
+      required:
+        - grant_type
+  securitySchemes:
+    hcOS_Dev_Cognito:
+      type: oauth2
+      description: OAuth token generated from API Gateway Cognito
+      flows:
+        clientCredentials:
+          tokenUrl: https://dev.hcos.upmce.net/oauth/token
+          scopes:
+            http://hcos.upmce.net/upmc/system/API.access: Grants access to the API
